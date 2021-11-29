@@ -1,0 +1,84 @@
+En git
+
+cd /home/ubuntu/Documents/dockerenvironment/ubuntu-ssh-enabled
+
+--------------------------------------------------------------------------------------
+
+// ANSIBLE INSTALL AND SETUP (UBUNTU)
+sudo apt install ansible
+sudo apt-get install sshpass
+
+sudo nano /etc/ansible/hosts and put these lines in the hosts file:
+
+[servers]
+server1 ansible_host=172.18.0.31 ansible_ssh_user=root ansible_ssh_pass=ansiblepass
+server2 ansible_host=172.18.0.32 ansible_ssh_user=root ansible_ssh_pass=ansiblepass
+server3 ansible_host=172.18.0.33 ansible_ssh_user=root ansible_ssh_pass=ansiblepass
+
+[all:vars]
+ansible_python_interpreter=/usr/bin/python3
+
+// CHECK INVENTORY
+ansible-inventory --list -y
+
+--------------------------------------------------------------------------------------
+
+// CONTAINERS CLEANUP
+docker ps -a
+docker stop machine_1 machine_2 machine_3
+docker rm machine_1 machine_2 machine_3
+
+// NETWORK SETUP
+docker network ls
+docker network rm ansiblenet
+docker network create --subnet=172.18.0.0/16 ansiblenet
+
+
+// IMAGES SETUP
+docker images
+docker rmi ansibleenvssh
+docker build -t ansibleenvssh .
+
+// CLEAN SSH FINGER PRINT
+ssh-keygen -f "/home/ubuntu/.ssh/known_hosts" -R "172.18.0.31"
+ssh-keygen -f "/home/ubuntu/.ssh/known_hosts" -R "172.18.0.32"
+ssh-keygen -f "/home/ubuntu/.ssh/known_hosts" -R "172.18.0.33"
+
+// CREATE CONTAINERS
+docker run -p 8131:80 --net ansiblenet --ip 172.18.0.31 --name machine_1 -d ansibleenvssh
+docker run -p 8132:80 --net ansiblenet --ip 172.18.0.32 --name machine_2 -d ansibleenvssh
+docker run -p 8133:80 --net ansiblenet --ip 172.18.0.33 --name machine_3 -d ansibleenvssh
+
+DONT USE: docker run --privileged --net ansiblenet --ip 172.18.0.34 --name machine_4 -d ansibleenvssh7
+
+// CONNECT TO IMAGES (root/ansiblepass) TO GET SSH KEYGEN
+ssh root@172.18.0.31    
+ssh root@172.18.0.32
+ssh root@172.18.0.33
+
+--------------------------------------------------------------------------------------
+// ANSIBLE DISK USAGE
+ansible all -a "df -h" -u root
+
+// ANSIBLE Uptime
+ansible servers -a "uptime" -u root
+
+// INSTALL apache
+ansible-playbook apache.yml
+
+// INSIDE EACH DOCKER CONTAINER
+Add this line at the end of the file /etc/apache2/apache2.conf (with nano)
+ServerName 127.0.0.1
+ 
+// INSIDE EACH DOCKER CONTAINER RESTART
+service apache2 restart
+
+
+
+
+
+
+
+
+
+
