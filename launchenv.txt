@@ -1,6 +1,11 @@
-En git
 
-cd /home/ubuntu/Documents/dockerenvironment/ubuntu-ssh-enabled
+// HOST SERVER UBUNTU 20.04
+
+--------------------------------------------------------------------------------------
+
+// INSTALL AND SETUP (DOCKER)
+
+- INSTALL DOCKER (see: https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-20-04-es)
 
 --------------------------------------------------------------------------------------
 
